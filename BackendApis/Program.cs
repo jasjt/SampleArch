@@ -1,3 +1,4 @@
+using Business.Services;
 using DataAccess;
 using DataAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 }, ServiceLifetime.Scoped);
 
 builder.Services.AddScoped<AppDbContext>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 
 // Add services to the container.

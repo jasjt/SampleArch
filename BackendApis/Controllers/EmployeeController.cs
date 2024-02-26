@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+using Business.Services;
 using Common.Models;
-using DataAccess.Repositories;
+using Microsoft.AspNetCore.Mvc;
+using EnumStatusCode = Common.Models.StatusCode;
 
 namespace BackendApis.Controllers
 {
@@ -9,53 +9,107 @@ namespace BackendApis.Controllers
     [Route("api/[controller]")]
     public class EmployeeController : ControllerBase
     {
-        private readonly IEmployeeRepository _employeeRepository;
+        private readonly IEmployeeService _employeeService;
 
-        public EmployeeController(IEmployeeRepository employeeRepository)
+        public EmployeeController(IEmployeeService employeeService)
         {
-            _employeeRepository = employeeRepository;
+            _employeeService = employeeService;
         }
 
         [HttpGet]
-        public IEnumerable<Employee> Get()
+        public IActionResult GetAllEmployees()
         {
-            return _employeeRepository.GetAllEmployees();
+            try
+            {
+                var response = _employeeService.GetAllEmployees();
+                return Ok(response); // Return 200 OK with ApiResponse object
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message); // Return 500 Internal Server Error
+            }
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Employee> Get(int id)
+        public IActionResult GetEmployeeById(int id)
         {
-            var employee = _employeeRepository.GetEmployeeById(id);
-            if (employee == null)
+            try
             {
-                return NotFound();
+                var response = _employeeService.GetEmployeeById(id);
+                if (response.StatusCode == EnumStatusCode.Success)
+                {
+                    return Ok(response.Data); // Return 200 OK with employee object
+                }
+                else
+                {
+                    return NotFound(); // Return 404 Not Found
+                }
             }
-            return employee;
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message); // Return 500 Internal Server Error
+            }
         }
 
         [HttpPost]
-        public IActionResult Post(Employee employee)
+        public IActionResult AddEmployee(Employee employee)
         {
-            _employeeRepository.AddEmployee(employee);
-            return CreatedAtAction(nameof(Get), new { id = employee.Id }, employee);
+            try
+            {
+                var response = _employeeService.AddEmployee(employee);
+                return CreatedAtAction(nameof(GetEmployeeById), new { id = response.Data.Id }, response.Data);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message); // Return 500 Internal Server Error
+            }
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, Employee employee)
+        public IActionResult UpdateEmployee(int id, Employee employee)
         {
-            if (id != employee.Id)
+            try
             {
-                return BadRequest();
+                if (id != employee.Id)
+                {
+                    return BadRequest("ID in the URL does not match the ID in the payload.");
+                }
+
+                var response = _employeeService.UpdateEmployee(employee);
+                if (response.StatusCode == EnumStatusCode.Success)
+                {
+                    return NoContent(); // Return 204 No Content
+                }
+                else
+                {
+                    return NotFound(); // Return 404 Not Found
+                }
             }
-            _employeeRepository.UpdateEmployee(employee);
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message); // Return 500 Internal Server Error
+            }
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public IActionResult DeleteEmployee(int id)
         {
-            _employeeRepository.DeleteEmployee(id);
-            return NoContent();
+            try
+            {
+                var response = _employeeService.DeleteEmployee(id);
+                if (response.StatusCode == EnumStatusCode.Success)
+                {
+                    return NoContent(); // Return 204 No Content
+                }
+                else
+                {
+                    return NotFound(); // Return 404 Not Found
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message); // Return 500 Internal Server Error
+            }
         }
     }
 }
