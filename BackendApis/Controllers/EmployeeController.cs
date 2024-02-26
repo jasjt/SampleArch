@@ -10,10 +10,12 @@ namespace BackendApis.Controllers
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;
+        private readonly ILogger<EmployeeController> _logger;
 
-        public EmployeeController(IEmployeeService employeeService)
+        public EmployeeController(IEmployeeService employeeService, ILogger<EmployeeController> logger)
         {
             _employeeService = employeeService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -26,7 +28,8 @@ namespace BackendApis.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message); // Return 500 Internal Server Error
+                _logger.LogError(ex, "An error occurred while fetching all employees.");
+                return StatusCode(500, "An unexpected error occurred. Please try again later.");
             }
         }
 
@@ -47,7 +50,8 @@ namespace BackendApis.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message); // Return 500 Internal Server Error
+                _logger.LogError(ex, $"An error occurred while fetching employee with ID {id}.");
+                return StatusCode(500, "An unexpected error occurred. Please try again later.");
             }
         }
 
@@ -61,7 +65,8 @@ namespace BackendApis.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message); // Return 500 Internal Server Error
+                _logger.LogError(ex, "An error occurred while adding the employee.");
+                return StatusCode(500, "An unexpected error occurred. Please try again later.");
             }
         }
 
@@ -87,7 +92,8 @@ namespace BackendApis.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message); // Return 500 Internal Server Error
+                _logger.LogError(ex, $"An error occurred while updating employee with ID {id}.");
+                return StatusCode(500, "An unexpected error occurred. Please try again later.");
             }
         }
 
@@ -108,7 +114,8 @@ namespace BackendApis.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message); // Return 500 Internal Server Error
+                _logger.LogError(ex, $"An error occurred while deleting employee with ID {id}.");
+                return StatusCode(500, "An unexpected error occurred. Please try again later.");
             }
         }
     }
