@@ -1,21 +1,27 @@
 using DataAccess;
 using DataAccess.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IEmployeeRepository, EmployeeRepository>();
+var connection = builder.Configuration.GetValue<string>("ConnectionStrings:DefaultConnection");
 
-var connection = builder.Configuration.GetValue<string>("DefaultConnection");
-
+// Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(connection));
+{
+    options.UseSqlServer(connection);
+    options.EnableSensitiveDataLogging();
+}, ServiceLifetime.Scoped);
+
+builder.Services.AddScoped<AppDbContext>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+
+// Add services to the container.
+builder.Services.AddControllers();
 
 var app = builder.Build();
 

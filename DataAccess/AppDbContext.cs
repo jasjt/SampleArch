@@ -1,4 +1,5 @@
 using Common.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess
 {

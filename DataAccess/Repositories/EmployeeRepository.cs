@@ -1,14 +1,11 @@
-using System.Collections.Generic;
-using System.Linq;
-using EmployeeManagementApi.Data;
-using EmployeeManagementApi.Models;
+using Common.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Repositories
 {
     public class EmployeeRepository : IEmployeeRepository
     {
         private readonly AppDbContext _context;
-
         public EmployeeRepository(AppDbContext context)
         {
             _context = context;
@@ -21,7 +18,7 @@ namespace DataAccess.Repositories
 
         public Employee GetEmployeeById(int id)
         {
-            return _context.Employees.FirstOrDefault(e => e.Id == id);
+            return _context.Employees.AsNoTracking().FirstOrDefault(e => e.Id == id);
         }
 
         public void AddEmployee(Employee employee)
@@ -32,7 +29,8 @@ namespace DataAccess.Repositories
 
         public void UpdateEmployee(Employee employee)
         {
-            _context.Employees.Update(employee);
+            _context.Attach(employee);
+            _context.Entry(employee).State = EntityState.Modified;
             _context.SaveChanges();
         }
 
